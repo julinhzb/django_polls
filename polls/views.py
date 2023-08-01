@@ -6,8 +6,8 @@ from polls.models import Question
 # Create your views here.
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
-
+    # return HttpResponse("Hello, world. You're at the polls index.")
+    return render(request, 'home.html')
 def sobre(request):
     return HttpResponse('Este é um app de enquete!')
 
