@@ -8,6 +8,9 @@ from polls.models import Question
 def index(request):
     # return HttpResponse("Hello, world. You're at the polls index.")
     return render(request, 'home.html')
+    context = {'titulo':'Página Principal'}
+    return render(request, 'home.html', context)
+
 def sobre(request):
     return HttpResponse('Este é um app de enquete!')
 
