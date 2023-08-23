@@ -24,3 +24,11 @@ def ultimas_perguntas(request):
     context = {'latest_question_list': latest_question_list}
    # return render(request, 'polls/perguntas.html', context)
     return render(request, 'perguntas_recentes.html', context)
+
+    from django.views.generic.edit import CreateView
+    from django.urls import reverse_lazy
+
+    class QuestionCreateView(CreateView):
+        model = Question
+        fields = ('question_text', 'pub_date')
+        success_url: reverse_lazy('index')
