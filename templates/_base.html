@@ -15,12 +15,15 @@
 <body>
     {% block header %} <!-- bloco de cabeçalho -->
     {% endblock %}
+
     {% block main %} <!-- bloco principal do body -->
-    {% block content %} <!-- bloco de conteúdo -->
+        {% block content %} <!-- bloco de conteúdo -->
+        {% endblock %}
     {% endblock %}
-    {% endblock %}
+
     {% block footer %} <!-- bloco de rodapé -->
     {% endblock %}
+    
     {% block javascript %} <!-- bloco extra abaixo do body -->
     {% endblock %}
 </body>
