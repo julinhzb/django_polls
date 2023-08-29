@@ -11,5 +11,10 @@ Mega Enquetes
             <h2>Em: {{ question.pub_date|date:"d / m / Y" }}</h2>
             <p>{{ question.question_text }}</p>
         </article>
+
+        <a href="{% url 'poll_add' %}" class="btn btn-lg btn-primary font-weight-bold">
+            + Pergunta
+            </a>
+            
 {% endfor %}
 {% endblock %} <!-- fecha o bloco content -->
