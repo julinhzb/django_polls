@@ -4,6 +4,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from polls.models import Question
 from django.views.generic import DetailView, ListView, TemplateView
+from django.contrib import messages
 
 
 # Create your views here.
@@ -37,7 +38,11 @@ class QuestionCreateView(CreateView):
     model = Question
     template_name = 'polls/question_form.html'
     fields = ('question_text', 'pub_date', )
-    success_url = reverse_lazy('polls_list')
+    success_url = reverse_lazy('polls_all')
+    success_message = 'Pergunta criada com sucesso!'
+    def form_valid(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super(QuestionCreateView, self).form_valid(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super(QuestionCreateView, self).get_context_data(**kwargs)
@@ -49,7 +54,11 @@ class QuestionUpdateView(UpdateView):
     model = Question
     template_name = 'polls/question_form.html'
     fields = ('question_text', 'pub_date', )
-    success_url = reverse_lazy('polls_list')
+    success_url = reverse_lazy('polls_all')
+    success_message = 'Pergunta alterada com sucesso!'
+    def form_valid(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super(QuestionUpdateView, self).form_valid(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)
@@ -59,7 +68,11 @@ class QuestionUpdateView(UpdateView):
 class QuestionDeleteView(DeleteView):
     model = Question
     template_name = 'polls/question_confirm_delete_form.html'
-    success_url = reverse_lazy('polls_list')
+    success_url = reverse_lazy('polls_all')
+    success_message = 'Pergunta excluída com sucesso.'
+    def form_valid(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super(QuestionDeleteView, self).form_valid(request, *args, **kwargs)
 
 class QuestionDetailView(DetailView):
     model = Question
