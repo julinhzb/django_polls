@@ -2,7 +2,8 @@ from django.shortcuts import render
 
 # Create your views here.
 
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib.auth.hashers import make_password 
 from django.contrib import messages
@@ -24,3 +25,21 @@ class AccountCreateView(CreateView):
         form.save()
         messages.success(self.request, self.success_message)
         return super(AccountCreateView, self).form_valid(form)
+
+class AccountUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    template_name = 'accounts/user_form.html'
+    fields = ('first_name', 'email', 'imagem', ) 
+    success_url = reverse_lazy('polls_all') 
+    success_message = 'Perfil atualizado com sucesso!'
+
+    def get_queryset(self): 
+        user_id = self.kwargs.get('pk')
+        if user is None or not user.is_authenticated or user_id != user.id:
+            return User.objects.none()
+
+        return User.objects.filter(id=user.id)
+
+    def form_valid(self, form): # executa quando os dados estiverem válidos
+        messages.success(self.request, self.success_message)
+        return super(AccountUpdateView, self).form_valid(form)
