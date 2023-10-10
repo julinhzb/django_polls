@@ -35,6 +35,7 @@ class AccountUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self): 
         user_id = self.kwargs.get('pk')
+        user = self.request.user
         if user is None or not user.is_authenticated or user_id != user.id:
             return User.objects.none()
 
