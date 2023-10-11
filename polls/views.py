@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.forms.models import BaseModelForm
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -59,6 +60,7 @@ class QuestionUpdateView(UpdateView):
     fields = ('question_text', 'pub_date', )
     success_url = reverse_lazy('polls_all')
     success_message = 'Pergunta alterada com sucesso!'
+
     def form_valid(self, request, *args, **kwargs):
         messages.success(self.request, self.success_message)
         return super(QuestionUpdateView, self).form_valid(request, *args, **kwargs)
@@ -66,6 +68,11 @@ class QuestionUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)
         context['form_title'] = 'Editando a pergunta'
+
+        question_id = self.kwargs.get('pk')
+        choices = Choice.objects.filter(question__pk=question_id)
+        context['question_choices'] = choices
+
         return context
 
 class QuestionDeleteView(LoginRequiredMixin, DeleteView):
@@ -92,3 +99,37 @@ class QuestionListView(ListView):
 
 class SobreTemplateView(TemplateView):
     template_name = 'polls/sobre.html'
+
+class ChoiceUpdateView(UpdateView):
+    model = Choice
+    template_name = 'polls/choice_form.html'
+    fields = ('choice_text', )
+    success_message = 'Alternativa atualizada com sucesso!'
+
+    def get_context_data(self, **kwargs):
+        context = super(ChoiceUpdateView, self).get_context_data(**kwargs)
+        context['form_title'] = 'Editando alternativa'
+
+        return context
+
+    def form_valid(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super(ChoiceUpdateView, self).form_valid(request, *args, **kwargs)
+
+    def get_success_url(self, *args, **kwargs):
+        question_id = self.object.question.id
+        return reverse_lazy('poll_edit', kwargs = {'pk': question_id})
+
+class ChoiceDeleteView(LoginRequiredMixin, DeleteView):
+    model = Choice 
+    template_name: 'polls/choice_confirm_delete_form.html'
+    success_message = 'Alternativa excluida com sucesso!'
+
+    def form_valid(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super(ChoiceDeleteView, self).form_valid(request, *args, **kwargs)
+
+    def get_success_url(self, *args, **kwargs):
+        question_id = self.object.question.id
+        return reverse_lazy('poll_edit', kwargs={'pk': question_id})
+
