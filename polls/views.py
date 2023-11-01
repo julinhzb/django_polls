@@ -132,4 +132,31 @@ class ChoiceDeleteView(LoginRequiredMixin, DeleteView):
     def get_success_url(self, *args, **kwargs):
         question_id = self.object.question.id
         return reverse_lazy('poll_edit', kwargs={'pk': question_id})
+    
+class ChoiceCreateView(CreateView):
+    model = Choice
+    template_name = 'polls/choice_form.html'
+    fields = ('choice_text', )
+    success_message = 'Alternativa registrada com sucesso!'
 
+    def dispatch(self, request, *args, **kwargs):
+        self.question = get_object_or_404(Question, pk=self.kwargs.gt('pk'))
+        return super(ChoiceCreateView, self).dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        question = get_object_or_404(Question, pk=self.kwargs.get('pk'))
+
+        context = super(ChoiceCreateView, self).get_context_data(**kwargs)
+        context['form_title'] = f'Alternativa para: {question.question_text}'
+
+        return context
+    
+    def form_valid(self, form):
+        form.instance.question = self.question
+        messages.success(self.request, self.success_message)
+        return super(ChoiceCreateView, self).form_valid(form)
+    
+    def get_success_url(self, *args, **kwargs):
+        question_id = self.kwargs.gt('pk')
+        return reverse_lazy('poll_edit', kwargs={'pk': question_id})
+    
