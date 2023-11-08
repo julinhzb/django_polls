@@ -1,10 +1,17 @@
 from django.db import models
 
-# Create your models here.
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField("date published")
+    author = models.ForeignKey(
+        User,
+        editable=False,
+        null=True,
+        on_delete=models.DO_NOTHING
+    )
 
     def __str__(self):
         return self.question_text
