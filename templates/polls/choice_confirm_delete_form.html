@@ -3,8 +3,18 @@
 <div class="card">
     <div class="card-header">
         <h5 class="card-title">Excluindo a alternativa {{ object.id }}</h5>
-        <br/>
-        <p>"{{ object.choice_text }}</p>
-        <br/>
+    </div>
+    <div class="card-body">
+
+        <form method="post">
+            {% csrf_token %}
+            <h6>Você tem certeza que deseja excluir a alternativa abaixo ?</h6>
+            <br />
+            <p>"{{ object.choice_text }}"</p>
+            <br />
+            <button type="submit" class="btn btn-danger">Confirmar</button>
+            <a href="{% url 'poll_edit' pk=object.question.id %}" class="link-secondary">Cancelar</a>
+        </form>
     </div>
 </div>
+{% endblock %}
