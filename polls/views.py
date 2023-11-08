@@ -1,3 +1,4 @@
+from typing import Any
 from django.forms.models import BaseModelForm
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
@@ -8,6 +9,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Sum
 
 
 # Create your views here.
@@ -90,6 +92,12 @@ class QuestionDetailView(DetailView):
     template_name = 'polls/question_detail.html'
     context_object_name = 'question'
 
+    def get_context_data(self, **kwargs):
+       context = super(QuestionDetailView, self).get_context_data(**kwargs)
+       votes = Choice.objects.filter(question=context['question']).aggregate(total=Sum('votes')) or 0
+       context['total_votes'] = votes.get('total')
+
+       return context
 class QuestionListView(ListView):
     model = Question
     template_name = 'polls/question_list.html'
