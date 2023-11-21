@@ -169,3 +169,19 @@ class ChoiceCreateView(CreateView):
         question_id = self.kwargs.gt('pk')
         return reverse_lazy('poll_edit', kwargs={'pk': question_id})
     
+    def vote(request, question_id):
+        question = get_object_or_404(Question, pk=question_id)
+        if request.method == 'POST':
+            try:
+                selected_choice = question.choice_set.get(pk=request.POST["choice"])
+            except (KeyError, Choice.DoesNotExist):
+                messages.error(request, 'Selecione uma alternativa para votar')
+            else:
+                selected_choice.votes += 1
+                selected_choice.save()
+                messages.success(request, 'Seu voto foi registrado com sucesso')
+                return redirect(reverse_lazy("poll_results", args=(question.id,)))
+
+        context = {'question': question}
+        return render(request, 'polls/question_detail.html', context)
+        

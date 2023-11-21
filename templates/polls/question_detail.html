@@ -7,9 +7,9 @@
     </div>
     <div class="card-body">
         {% if question.author %}
-            <strong>Autor:</strong> {{ question.author.username }}
+            <span>Autor: {{ question.author.username}} </span>
         {% else %}
-            <strong>Autor:</strong> Desconhecido
+            <span>Autor: Desconhecido</span>
         {% endif %} <br>
         <p>
             {{ question.question_text }}
