@@ -1,15 +1,18 @@
 from typing import Any
 from django.forms.models import BaseModelForm
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from polls.models import Question
 from django.views.generic import DetailView, ListView, TemplateView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
+from django.core.exceptions import ValidationError
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 # Create your views here.
@@ -98,6 +101,7 @@ class QuestionDetailView(DetailView):
        context['total_votes'] = votes.get('total')
 
        return context
+    
 class QuestionListView(ListView):
     model = Question
     template_name = 'polls/question_list.html'
@@ -131,7 +135,7 @@ class ChoiceUpdateView(UpdateView):
 
 class ChoiceDeleteView(LoginRequiredMixin, DeleteView):
     model = Choice 
-    template_name: 'polls/choice_confirm_delete_form.html'
+    template_name = 'polls/choice_confirm_delete_form.html'
     success_message = 'Alternativa excluida com sucesso!'
 
     def form_valid(self, request, *args, **kwargs):
@@ -169,19 +173,46 @@ class ChoiceCreateView(CreateView):
         question_id = self.kwargs.gt('pk')
         return reverse_lazy('poll_edit', kwargs={'pk': question_id})
     
+    @login_required
     def vote(request, question_id):
         question = get_object_or_404(Question, pk=question_id)
         if request.method == 'POST':
             try:
                 selected_choice = question.choice_set.get(pk=request.POST["choice"])
+                selected_choice.votes += 1
+                session_user = get_object_or_404(User, id=request.user.id)
+                selected_choice.save(user=session_user)
+
             except (KeyError, Choice.DoesNotExist):
                 messages.error(request, 'Selecione uma alternativa para votar')
+
+            except (ValidationError) as error:
+                messages.error(request, error.message)
+
             else:
-                selected_choice.votes += 1
-                selected_choice.save()
                 messages.success(request, 'Seu voto foi registrado com sucesso')
                 return redirect(reverse_lazy("poll_results", args=(question.id,)))
 
         context = {'question': question}
         return render(request, 'polls/question_detail.html', context)
-        
+    
+    def results(request, question_id):
+        question = get_object_or_404(Question, pk=question_id)
+        votes = Choice.objects.filter(question=question).aggregate(total=Sum('votes')) or 0
+        total_votes = votes.get('total')
+        context = {"question": question}
+
+        context['votes'] = []
+        for choice in question.choice_set.all():
+            percentage = 0
+            if choice.votes > 0 and total_votes > 0:
+                percentage = choice.votes / total_votes * 100
+
+            context['votes'].append(
+                {
+                    'text':choice.choice_text, 
+                    'votes': choice.votes,
+                    'percentage': round(percentage, 2)
+                }
+            )
+        return render(request, "polls/results.html", context)

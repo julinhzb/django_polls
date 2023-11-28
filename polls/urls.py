@@ -46,5 +46,9 @@ urlpatterns = [
     path('pergunta/<int:question_id>/vote',
          views.vote,
          name="poll_vote"
+    ),
+    path('pergunta/<int:question_id>/results',
+        views.results,
+        name="poll_results"
     )
 ]
